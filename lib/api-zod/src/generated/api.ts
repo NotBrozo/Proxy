@@ -14,3 +14,19 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * Fetches a remote URL and returns the rewritten HTML
+ * @summary Proxy fetch a URL
+ */
+export const ProxyFetchQueryParams = zod.object({
+  url: zod.coerce.string().describe("The URL to proxy"),
+});
+
+/**
+ * Fetches a remote resource and streams it back
+ * @summary Proxy a resource (CSS, JS, images, etc.)
+ */
+export const ProxyResourceQueryParams = zod.object({
+  url: zod.coerce.string().describe("The resource URL to proxy"),
+});

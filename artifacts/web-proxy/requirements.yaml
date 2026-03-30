@@ -1,0 +1,13 @@
+packages:
+  "framer-motion": "For smooth page transitions, interactive URL bar animations, and loading progress bar"
+  "clsx": "For conditional class names"
+  "tailwind-merge": "For merging tailwind classes in reusable components"
+
+images:
+  - path: "artifacts/web-proxy/public/images/tech-bg.png"
+    description: "Dark, sleek, abstract geometric background with subtle neon cyan and deep purple accents, glowing wireframe or grid, highly minimalist, depth of field"
+    aspect_ratio: "16:9"
+
+notes:
+  - The app uses an iframe pointed at `/api/proxy?url=...` for rendering proxied content.
+  - The frontend relies on the backend to rewrite URLs correctly inside the iframe to keep everything same-origin so we can sync the top URL bar when users click links inside the proxy.

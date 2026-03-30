@@ -16,6 +16,11 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
 
+## Artifacts
+
+### `artifacts/web-proxy` — Incognito Proxy (react-vite, preview: `/`)
+A browser-within-a-browser web proxy. Dark, sleek UI with URL bar, back/forward/reload/home buttons, bookmarks (DuckDuckGo, Wikipedia, YouTube). The iframe loads pages via `/api/proxy?url=...` and the backend rewrites all HTML links to route through the proxy. CSS resources go through `/api/proxy/resource?url=...`. A small injected script in proxied HTML posts messages to the parent to keep the URL bar in sync.
+
 ## Structure
 
 ```text

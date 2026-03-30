@@ -8,3 +8,22 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface ErrorResponse {
+  error: string;
+  message: string;
+}
+
+export type ProxyFetchParams = {
+  /**
+   * The URL to proxy
+   */
+  url: string;
+};
+
+export type ProxyResourceParams = {
+  /**
+   * The resource URL to proxy
+   */
+  url: string;
+};

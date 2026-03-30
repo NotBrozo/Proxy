@@ -13,7 +13,12 @@ import type {
   UseQueryResult,
 } from "@tanstack/react-query";
 
-import type { HealthStatus } from "./api.schemas";
+import type {
+  ErrorResponse,
+  HealthStatus,
+  ProxyFetchParams,
+  ProxyResourceParams,
+} from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
 import type { ErrorType } from "../custom-fetch";
@@ -92,6 +97,196 @@ export function useHealthCheck<
   request?: SecondParameter<typeof customFetch>;
 }): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
   const queryOptions = getHealthCheckQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Fetches a remote URL and returns the rewritten HTML
+ * @summary Proxy fetch a URL
+ */
+export const getProxyFetchUrl = (params: ProxyFetchParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/proxy?${stringifiedParams}`
+    : `/api/proxy`;
+};
+
+export const proxyFetch = async (
+  params: ProxyFetchParams,
+  options?: RequestInit,
+): Promise<string> => {
+  return customFetch<string>(getProxyFetchUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getProxyFetchQueryKey = (params?: ProxyFetchParams) => {
+  return [`/api/proxy`, ...(params ? [params] : [])] as const;
+};
+
+export const getProxyFetchQueryOptions = <
+  TData = Awaited<ReturnType<typeof proxyFetch>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: ProxyFetchParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof proxyFetch>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getProxyFetchQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof proxyFetch>>> = ({
+    signal,
+  }) => proxyFetch(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof proxyFetch>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ProxyFetchQueryResult = NonNullable<
+  Awaited<ReturnType<typeof proxyFetch>>
+>;
+export type ProxyFetchQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Proxy fetch a URL
+ */
+
+export function useProxyFetch<
+  TData = Awaited<ReturnType<typeof proxyFetch>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: ProxyFetchParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof proxyFetch>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getProxyFetchQueryOptions(params, options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+/**
+ * Fetches a remote resource and streams it back
+ * @summary Proxy a resource (CSS, JS, images, etc.)
+ */
+export const getProxyResourceUrl = (params: ProxyResourceParams) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? "null" : value.toString());
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0
+    ? `/api/proxy/resource?${stringifiedParams}`
+    : `/api/proxy/resource`;
+};
+
+export const proxyResource = async (
+  params: ProxyResourceParams,
+  options?: RequestInit,
+): Promise<Blob> => {
+  return customFetch<Blob>(getProxyResourceUrl(params), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getProxyResourceQueryKey = (params?: ProxyResourceParams) => {
+  return [`/api/proxy/resource`, ...(params ? [params] : [])] as const;
+};
+
+export const getProxyResourceQueryOptions = <
+  TData = Awaited<ReturnType<typeof proxyResource>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: ProxyResourceParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof proxyResource>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getProxyResourceQueryKey(params);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof proxyResource>>> = ({
+    signal,
+  }) => proxyResource(params, { signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof proxyResource>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ProxyResourceQueryResult = NonNullable<
+  Awaited<ReturnType<typeof proxyResource>>
+>;
+export type ProxyResourceQueryError = ErrorType<ErrorResponse>;
+
+/**
+ * @summary Proxy a resource (CSS, JS, images, etc.)
+ */
+
+export function useProxyResource<
+  TData = Awaited<ReturnType<typeof proxyResource>>,
+  TError = ErrorType<ErrorResponse>,
+>(
+  params: ProxyResourceParams,
+  options?: {
+    query?: UseQueryOptions<
+      Awaited<ReturnType<typeof proxyResource>>,
+      TError,
+      TData
+    >;
+    request?: SecondParameter<typeof customFetch>;
+  },
+): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getProxyResourceQueryOptions(params, options);
 
   const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
     queryKey: QueryKey;
